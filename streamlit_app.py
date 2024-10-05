@@ -88,6 +88,9 @@ https://www.ratemyprofessors.com/
 [3] “Find and rate your professor or school,” Rate My Professors, https://www.ratemyprofessors.com/ [accessed Oct. 4, 2024]. 
 
  
+Gantt Chart:
+https://gtvault.sharepoint.com/:x:/s/CS4641ProjectGroup120/EZY21_YXBgZOlRWj8EyASzAB2wrWbY-PQEUM1Bkezptn8Q?e=pntQ71
+
 
 Contributions 
 
