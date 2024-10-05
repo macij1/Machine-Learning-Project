@@ -23,13 +23,13 @@ We aim to automate the data acquisition process since the grade distribution dat
 
 Preprocessing 
 
-One-Hot Encoding 
+One-Hot Encoding: 
 We will utilize Scikit-learn's OneHotEncoder to convert categorical data, such as professor names, department names, or different semesters, into binary values. 
 
-Standard Scaling 
+Standard Scaling: 
 We will apply Scikit-learn's StandardScaler to remove the mean and scale the features to unit variance, which is crucial for algorithms sensitive to feature scaling, such as SVM or K-means. 
 
-Handling Missing Values 
+Handling Missing Values: 
 We will use Scikit-learn's SimpleImputer to define strategies for imputing missing values, such as replacing them with zero, mean, median, or the most frequent value. 
 
 Other advanced preprocessing methods we have considered include non-linear transformations and normalization. 
@@ -38,18 +38,18 @@ Other advanced preprocessing methods we have considered include non-linear trans
 
 Machine Learning Methods 
 
-Random Forest 
+Random Forest: 
 We will employ Scikit-learn's RandomForestClassifier or RandomForestRegressor to predict grade distributions based on features like professor, department, semester, or class size and to analyze feature importance. 
 
-Support Vector Machines (SVM) 
+Support Vector Machines (SVM): 
 We will utilize Scikit-learn's SVC (Support Vector Classifier) to classify classes based on expected difficulty levels (e.g., “Easy,” “Medium,” “Hard,” and “Very Hard”) and compare these classifications with simpler metrics. 
 
-K-Means 
+K-Means: 
 We will use Scikit-learn's KMeans to explore clustering in our database and identify natural groupings among classes, such as clusters with consistently high or low grade distributions. 
 
  
 
-Potential Methods for Further Exploration 
+Potential Methods for Further Exploration: 
 
 Principal Component Analysis (PCA) 
 
@@ -92,7 +92,7 @@ Gantt Chart:
 https://gtvault.sharepoint.com/:x:/s/CS4641ProjectGroup120/EZY21_YXBgZOlRWj8EyASzAB2wrWbY-PQEUM1Bkezptn8Q?e=pntQ71
 
 
-Contributions 
+Contributions: 
 
 John Andrade 
 
