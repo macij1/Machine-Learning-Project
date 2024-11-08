@@ -19,13 +19,7 @@ from sklearn.metrics import mutual_info_score, adjusted_rand_score
 from sklearn.model_selection import train_test_split, KFold, cross_val_score, cross_val_predict
 from sklearn.cluster import KMeans
 
-#Get data and show that it has done so, Note you will have to upload the data if opened on google Colab, file in teams chat
-
-data = pd.read_excel('Grade_Distribution_Data.xlsx', sheet_name='AY2023 AY2024 Grade Distro')
-data.head()
-
-#Binary encoding
-
+# Binary encoding
 def binary_encode_column(df, column_name):
     # Get unique values in the column and the number of bits required
     unique_values = df[column_name].unique()
@@ -42,123 +36,114 @@ def binary_encode_column(df, column_name):
 
     return binary_mapping
 
-#Begin preprocessing here
-#There is a lot more that can be done with pandas for manipulating our data, this is just a start
-
-train_data = data.copy(deep="True")
-
-np.random.seed(100)
-
-train_data.drop(columns=['A', 'B', 'C', 'D', 'F', 'W', 'Section', 'Trm Code'], inplace=True)
-train_data.rename(columns={'Academic Year': 'AcademicYear', 'Course Subject and Number': 'CourseSubjectandNumber', 'Average Grade': 'AverageGrade', 'Primary Instructor Name': 'PrimaryInstructorName'}, inplace=True)
-train_data = train_data[train_data.AcademicYear != "2022-23"]
-train_data = train_data[train_data.AverageGrade != 4]
-train_data = train_data[train_data.AverageGrade != 'Total']
-train_data.drop(columns=['AcademicYear'], inplace=True)
-#train_data = train_data[train_data['CourseSubjectandNumber'].str.contains("CS")] <-- we have no CS classes lol
-train_data.dropna(inplace=True)
-
-#Begin converting all strings into ints, this require a lot of encoding and will be difficult for instructors
-# Split into Subject and Number more clearly
-split_data = train_data['CourseSubjectandNumber'].str.split(' ', n=1, expand=True)
-train_data['Subject'] = split_data[0]
-train_data['Number'] = split_data[1].astype(int)
-train_data.drop(columns=['CourseSubjectandNumber'], inplace=True)
-train_data.rename(columns={'PrimaryInstructorName': 'Instructor'}, inplace=True)
-#print(train_data.columns)
-
-columns_map = {'Subject': {'AE': 0, 'ARCH': 1, 'ECE': 2, 'ME': 3, 'NRE': 4, 'AE': 5, 'MP': 6}}
-train_data.replace(columns_map, inplace=True)
-
-#Temporary insert of answers for now, plus randomizer, should do this manually or something later, 0 = easy, 1 = hard
-train_data.insert(len(train_data.columns), "Difficulty", 0)
-change = train_data.sample(int(0.2*len(train_data))).index
-train_data.loc[change,'Difficulty'] = 1
-
-# TODO: Recover name with the mapping
-instructor_encode_map = binary_encode_column(train_data, 'Instructor')
-train_data.drop(columns=['Instructor'], inplace=True)
-
-#Easy way to split into train and test, only train is used right now
-train, test = np.split(train_data.sample(frac=1), [int(0.8*len(train_data))])
-
-X_train = train.loc[:, train_data.columns != 'Difficulty']
-y_train = train.loc[:, 'Difficulty']
-
-X_train
-
-y_train
+def preprocess_data(filename = 'Grade_Distribution_Data.xlsx'):
+    # Get data and show that it has done so, Note you will have to upload the data if opened on google Colab, file in teams chat
+    data = pd.read_excel(filename, sheet_name='AY2023 AY2024 Grade Distro')
+    data.head()
+    
+    # Begin preprocessing here
+    # There is a lot more that can be done with pandas for manipulating our data, this is just a start
+    train_data = data.copy(deep="True")
+    np.random.seed(100)
+    train_data.drop(columns=['A', 'B', 'C', 'D', 'F', 'W', 'Section', 'Trm Code'], inplace=True)
+    train_data.rename(columns={'Academic Year': 'AcademicYear', 'Course Subject and Number': 'CourseSubjectandNumber', 'Average Grade': 'AverageGrade', 'Primary Instructor Name': 'PrimaryInstructorName'}, inplace=True)
+    train_data = train_data[train_data.AcademicYear != "2022-23"]
+    train_data = train_data[train_data.AverageGrade != 4]
+    train_data = train_data[train_data.AverageGrade != 'Total']
+    train_data.drop(columns=['AcademicYear'], inplace=True)
+    #train_data = train_data[train_data['CourseSubjectandNumber'].str.contains("CS")] <-- we have no CS classes lol
+    train_data.dropna(inplace=True)
+    
+    # Begin converting all strings into ints, this require a lot of encoding and will be difficult for instructors
+    # Split into Subject and Number more clearly
+    split_data = train_data['CourseSubjectandNumber'].str.split(' ', n=1, expand=True)
+    train_data['Subject'] = split_data[0]
+    train_data['Number'] = split_data[1].astype(int)
+    train_data.drop(columns=['CourseSubjectandNumber'], inplace=True)
+    train_data.rename(columns={'PrimaryInstructorName': 'Instructor'}, inplace=True)
+    #print(train_data.columns)
+    
+    columns_map = {'Subject': {'AE': 0, 'ARCH': 1, 'ECE': 2, 'ME': 3, 'NRE': 4, 'AE': 5, 'MP': 6}}
+    train_data.replace(columns_map, inplace=True)
+    
+    # Temporary insert of answers for now, plus randomizer, should do this manually or something later, 0 = easy, 1 = hard
+    train_data.insert(len(train_data.columns), "Difficulty", 0)
+    change = train_data.sample(int(0.2*len(train_data))).index
+    train_data.loc[change,'Difficulty'] = 1
+    
+    # TODO: Recover name with the mapping
+    instructor_encode_map = binary_encode_column(train_data, 'Instructor')
+    train_data.drop(columns=['Instructor'], inplace=True)
+    
+    # Easy way to split into train and test, only train is used right now
+    train, test = np.split(train_data.sample(frac=1), [int(0.8*len(train_data))])
+    
+    X_train = train.loc[:, train_data.columns != 'Difficulty']
+    y_train = train.loc[:, 'Difficulty']
 
 #KMeans
+def kmeans(X_train, y_train):
+    model = KMeans(n_clusters=2, random_state=0, n_init="auto") #Basic, no parameter tweaking really
+    km_model = model.fit(X_train.values) # Need everything to be numbers instead of strings
 
-model = KMeans(n_clusters=2, random_state=0, n_init="auto") #Basic, no parameter tweaking really
+    # confusion matrix
+    KM_y_pred = cross_val_predict(model, X_train, y_train) #Default parameters once again, perhaps specify number of folds?
 
-km_model = model.fit(X_train.values) # Need everything to be numbers instead of strings
+    KM_tn, KM_fp, KM_fn, KM_tp = confusion_matrix(y_train, KM_y_pred).ravel()
+    # print("True Negatives", KM_tn)
+    # print("False Positives", KM_fp)
+    # print("False Negatives", KM_fn)
+    # print("True Positives", KM_tp)
 
-# confusion matrix
-KM_y_pred = cross_val_predict(model, X_train, y_train) #Default parameters once again, perhaps specify number of folds?
+    # silhouette = silhouette_score(X_train, km_model.labels_)
+    # db_index = davies_bouldin_score(X_train, km_model.labels_)
+    # ch_index = calinski_harabasz_score(X_train, km_model.labels_)
+    # print(f"Silhouette Score: {silhouette:.2f}")
+    # print(f"Davies-Bouldin Index: {db_index:.2f}")
+    # print(f"Calinski-Harabasz Index: {ch_index:.2f}")
 
-KM_tn, KM_fp, KM_fn, KM_tp = confusion_matrix(y_train, KM_y_pred).ravel()
-print("True Negatives", KM_tn)
-print("False Positives", KM_fp)
-print("False Negatives", KM_fn)
-print("True Positives", KM_tp)
+    # fm_score = fowlkes_mallows_score(y_train, km_model.labels_)
+    # print(f"Fowlkes-Mallows Score: {fm_score:.2f}")
+    return KM_y_pred
 
-silhouette = silhouette_score(X_train, km_model.labels_)
-db_index = davies_bouldin_score(X_train, km_model.labels_)
-ch_index = calinski_harabasz_score(X_train, km_model.labels_)
-print(f"Silhouette Score: {silhouette:.2f}")
-print(f"Davies-Bouldin Index: {db_index:.2f}")
-print(f"Calinski-Harabasz Index: {ch_index:.2f}")
+# 2D Kmeans to try visualization. Irrelevant values
+def 2d_Kmeans(X_train, y_train, labels)
 
-fm_score = fowlkes_mallows_score(y_train, km_model.labels_)
-print(f"Fowlkes-Mallows Score: {fm_score:.2f}")
+    Xv = X_train[['AverageGrade', 'Number']]
+    
+    # Standard scaling
+    scaler = preprocessing.StandardScaler()
+    scaled = scaler.fit_transform(Xv)
+    Xv_scaled = pd.DataFrame(scaled, columns=Xv.columns)
+    
+    model = KMeans(n_clusters=4, random_state=0, n_init="auto") #Basic, no parameter tweaking really
+    labels = model.fit_predict(Xv_scaled) # Need everything to be numbers instead of strings
+    u_labels = np.unique(labels)
+    
+    Xv['Cluster'] = labels
+    Xv_scaled['Cluster'] = labels
+    
+    
+    # Plot the data with clusters in the standarized scale
+    plt.title('Scaled data')
+    for cluster in Xv_scaled['Cluster'].unique():
+        cluster_data = Xv_scaled[Xv_scaled['Cluster'] == cluster]
+        plt.scatter(cluster_data['AverageGrade'], cluster_data['Number'], label=f'Cluster {cluster}')
+    plt.legend()
+    plt.show()
+    
+    # Plot the data with clusters in the original scale
+    plt.title('Original data')
+    for cluster in Xv['Cluster'].unique():
+        cluster_data = Xv[Xv['Cluster'] == cluster]
+        plt.scatter(cluster_data['AverageGrade'],
+                   cluster_data['Number'],
+                   label=f'Cluster {cluster}',
+                   alpha=0.5,
+                   s=20,
+                   rasterized=True)
+    plt.legend()
+    plt.show()
 
-print(km_model.labels_)
+    return Xv, Xv_scaled labels
 
-#2D Kmeans to try visualization
-Xv = X_train[['AverageGrade', 'Number']]
-
-# Standard scaling
-scaler = preprocessing.StandardScaler()
-scaled = scaler.fit_transform(Xv)
-Xv_scaled = pd.DataFrame(scaled, columns=Xv.columns)
-
-model = KMeans(n_clusters=4, random_state=0, n_init="auto") #Basic, no parameter tweaking really
-labels = model.fit_predict(Xv_scaled) # Need everything to be numbers instead of strings
-u_labels = np.unique(labels)
-
-# VISUALIZATION
-
-Xv['Cluster'] = labels
-Xv_scaled['Cluster'] = labels
-
-plt.title('Raw data')
-plt.scatter(Xv['AverageGrade'],
-            Xv['Number'],
-            alpha=0.5,
-            s=20,
-            rasterized=True)
-plt.legend()
-plt.show()
-
-# Plot the data with clusters in the original scale
-plt.title('Scaled data')
-for cluster in Xv_scaled['Cluster'].unique():
-    cluster_data = Xv_scaled[Xv_scaled['Cluster'] == cluster]
-    plt.scatter(cluster_data['AverageGrade'], cluster_data['Number'], label=f'Cluster {cluster}')
-plt.legend()
-plt.show()
-
-# Plot the data with clusters in the original scale
-plt.title('Original data')
-for cluster in Xv['Cluster'].unique():
-    cluster_data = Xv[Xv['Cluster'] == cluster]
-    plt.scatter(cluster_data['AverageGrade'],
-               cluster_data['Number'],
-               label=f'Cluster {cluster}',
-               alpha=0.5,
-               s=20,
-               rasterized=True)
-plt.legend()
-plt.show()
