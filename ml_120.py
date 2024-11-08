@@ -80,6 +80,7 @@ def preprocess_data(filename = 'Grade_Distribution_Data.xlsx'):
     
     X_train = train.loc[:, train_data.columns != 'Difficulty']
     y_train = train.loc[:, 'Difficulty']
+    return X_train, y_train
 
 #KMeans
 def kmeans(X_train, y_train):
@@ -107,43 +108,16 @@ def kmeans(X_train, y_train):
     return KM_y_pred
 
 # 2D Kmeans to try visualization. Irrelevant values
-def 2d_Kmeans(X_train, y_train, labels)
-
+def two_d_Kmeans(X_train, y_train):
     Xv = X_train[['AverageGrade', 'Number']]
-    
+
     # Standard scaling
     scaler = preprocessing.StandardScaler()
     scaled = scaler.fit_transform(Xv)
     Xv_scaled = pd.DataFrame(scaled, columns=Xv.columns)
-    
-    model = KMeans(n_clusters=4, random_state=0, n_init="auto") #Basic, no parameter tweaking really
-    labels = model.fit_predict(Xv_scaled) # Need everything to be numbers instead of strings
-    u_labels = np.unique(labels)
-    
-    Xv['Cluster'] = labels
-    Xv_scaled['Cluster'] = labels
-    
-    
-    # Plot the data with clusters in the standarized scale
-    plt.title('Scaled data')
-    for cluster in Xv_scaled['Cluster'].unique():
-        cluster_data = Xv_scaled[Xv_scaled['Cluster'] == cluster]
-        plt.scatter(cluster_data['AverageGrade'], cluster_data['Number'], label=f'Cluster {cluster}')
-    plt.legend()
-    plt.show()
-    
-    # Plot the data with clusters in the original scale
-    plt.title('Original data')
-    for cluster in Xv['Cluster'].unique():
-        cluster_data = Xv[Xv['Cluster'] == cluster]
-        plt.scatter(cluster_data['AverageGrade'],
-                   cluster_data['Number'],
-                   label=f'Cluster {cluster}',
-                   alpha=0.5,
-                   s=20,
-                   rasterized=True)
-    plt.legend()
-    plt.show()
 
-    return Xv, Xv_scaled labels
+    model = KMeans(n_clusters=4, random_state=0, n_init="auto") #Basic, no parameter tweaking really
+    labels = model.fit_predict(Xv_scaled, y_train) # Need everything to be numbers instead of strings
+
+    return Xv, Xv_scaled, labels
 

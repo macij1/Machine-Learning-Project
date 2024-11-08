@@ -1,119 +1,159 @@
 import streamlit as st
-import ml_120
+import ml_120 as utils
+import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
 
-st.write(
-    """Introduction 
+import streamlit as st
 
-Many students have trouble deciding how hard a class can be due to many vary factors. In our project, we wish to simplify this by looking at grade distributions for classes, professor rating, and class size to determine the difficulty of a class. Our main dataset we will use is a grade distribution of all Georgia Tech classes [2]. This website can filter by college, course number, professor, and semester and relays the average GPA of the class during that time. We will also use professor rating websites to determine how the professor ratings can affect the GPA [3]. Finally, we will also factor in class sizes for determining difficulty [1]. 
+# Title of the app
+st.title("Group 120: Machine Project Overview")
 
- 
+# Introduction Section
+st.header("Introduction")
+st.write("""
+Many students struggle with determining how hard a class can be due to many varying factors. In our project, we aim to simplify this by looking at grade distributions for classes, professor ratings, and class sizes to determine the difficulty of a class.
 
-Problem Definition 
+Our main dataset is the grade distribution of all Georgia Tech classes [2]. This website can filter by college, course number, professor, and semester, and provides the average GPA of the class during that time. We will also use professor rating websites to see how professor ratings affect GPA [3]. Finally, we will factor in class sizes for determining difficulty [1].
+""")
 
-A common dilemma college students face is determining how difficult a class can be, especially without using external resources, which is important for Georgia Tech students as they very often care about their grade in these classes as well as how much effort is required. We aim to simplify this process with an ML approach through classifying class difficulty into ranges from easy to very hard with the previously mentioned factors of grade distribution, professor rating, and class size. 
+# Problem Definition Section
+st.header("Problem Definition")
+st.write("""
+A common dilemma for college students is determining how difficult a class can be, especially without external resources. This is crucial for Georgia Tech students, as they often care about their grade and the amount of effort required in these classes. We aim to simplify this process with an ML approach, classifying class difficulty into ranges from "easy" to "very hard" using grade distribution, professor rating, and class size as features.
+""")
 
- 
+# Methods Section
+st.header("Methods")
 
-Methods 
+# Data Acquisition Subheader
+st.subheader("Data Acquisition")
+st.write("""
+We plan to automate data acquisition, as grade distribution data is not directly downloadable, and professor ratings and class sizes need to be gathered as well. We will consider using web scraping tools like BeautifulSoup in our data pipeline, and if successful, we will apply this to other websites like RateMyProfessor.
+""")
 
-Data Acquisition 
+# Preprocessing Subheader
+st.subheader("Preprocessing")
 
-We aim to automate the data acquisition process since the grade distribution data cannot be downloaded directly as well as professor rating and class size. We will consider using a web-scraping tool such as BeautifulSoup in our data pipeline, and if successful, we will apply this to other websites such as RateMyProfessor. 
+st.write("""
+- **One-Hot Encoding**: We will use Scikit-learn's `OneHotEncoder` to convert categorical data (e.g., professor names, department names, semesters) into binary values.
+- **Standard Scaling**: We will apply Scikit-learn's `StandardScaler` to remove the mean and scale features to unit variance. This is crucial for algorithms sensitive to feature scaling, such as SVM or K-means.
+- **Handling Missing Values**: We will use Scikit-learn's `SimpleImputer` to define strategies for imputing missing values (e.g., replacing them with zero, mean, median, or the most frequent value).
 
- 
+We will also explore advanced preprocessing methods like non-linear transformations and normalization.
+""")
 
-Preprocessing 
+# Machine Learning Methods Subheader
+st.subheader("Machine Learning Methods")
+st.write("""
+- **Random Forest**: We will use Scikit-learn's `RandomForestClassifier` or `RandomForestRegressor` to predict grade distributions based on features like professor, department, semester, and class size, and to analyze feature importance.
+- **Support Vector Machines (SVM)**: We will use Scikit-learn's `SVC` (Support Vector Classifier) to classify classes into difficulty levels (e.g., “Easy,” “Medium,” “Hard,” “Very Hard”) and compare these classifications with simpler metrics.
+- **K-Means**: We will use Scikit-learn's `KMeans` to explore clustering in our database and identify natural groupings among classes, such as clusters with consistently high or low grade distributions.
+""")
 
-One-Hot Encoding: 
-We will utilize Scikit-learn's OneHotEncoder to convert categorical data, such as professor names, department names, or different semesters, into binary values. 
+# Potential Methods for Further Exploration Subheader
+st.subheader("Potential Methods for Further Exploration")
+st.write("""
+- **Principal Component Analysis (PCA)**
+- **Gaussian Mixture Models (GMM)**
+- **Gradient Boosting Machines (GBM)**
+""")
 
-Standard Scaling: 
-We will apply Scikit-learn's StandardScaler to remove the mean and scale the features to unit variance, which is crucial for algorithms sensitive to feature scaling, such as SVM or K-means. 
+# Results and Discussion Section
+st.header("Results/Discussion")
+st.write("""
+Since we are primarily doing classification, our main evaluation metric will be the **F1 score**, as it provides a good balance of precision and recall. We are aiming for an F1 score greater than 0.8. We will also use the **recall score** to determine how well our model correctly identifies class difficulty. Finally, although the **accuracy score** doesn't tell the full story, we will include it to measure how often our classifiers fail to correctly identify class difficulty.
+""")
 
-Handling Missing Values: 
-We will use Scikit-learn's SimpleImputer to define strategies for imputing missing values, such as replacing them with zero, mean, median, or the most frequent value. 
+# Citations Section
+st.header("Citations")
+st.write("""
+1. [Small Classes, Big Possibilities](https://www.aasa.org/resources/resource/small-classes-big-possibilities) [Accessed Oct. 4, 2024]
+2. [Grade Distribution - Georgia Tech](https://lite.gatech.edu/lite_script/dashboards/grade_distribution.html) [Accessed Oct. 4, 2024]
+3. [Rate My Professors](https://www.ratemyprofessors.com/) [Accessed Oct. 4, 2024]
+""")
 
-Other advanced preprocessing methods we have considered include non-linear transformations and normalization. 
+# Gantt Chart Section
+st.header("Gantt Chart")
+st.write("You can view our Gantt chart [here](https://gtvault.sharepoint.com/:x:/s/CS4641ProjectGroup120/EZY21_YXBgZOlRWj8EyASzAB2wrWbY-PQEUM1Bkezptn8Q?e=pntQ71).")
 
- 
-
-Machine Learning Methods 
-
-Random Forest: 
-We will employ Scikit-learn's RandomForestClassifier or RandomForestRegressor to predict grade distributions based on features like professor, department, semester, or class size and to analyze feature importance. 
-
-Support Vector Machines (SVM): 
-We will utilize Scikit-learn's SVC (Support Vector Classifier) to classify classes based on expected difficulty levels (e.g., “Easy,” “Medium,” “Hard,” and “Very Hard”) and compare these classifications with simpler metrics. 
-
-K-Means: 
-We will use Scikit-learn's KMeans to explore clustering in our database and identify natural groupings among classes, such as clusters with consistently high or low grade distributions. 
-
- 
-
-Potential Methods for Further Exploration: 
-
-Principal Component Analysis (PCA) 
-
-Gaussian Mixture Models (GMM) 
-
-Gradient Boosting Machines (GBM) 
-
- 
-
-Results/Discussion 
-
-Since we are mainly doing classification, we will want to use good metrics for classification. Our main scoring method will be the F1 score as it gives a good balance of judging precision and accuracy of our ML methods. This score will easily, but not entirely, tell us how well our methods are performing. The F1 score ranges from 1 to 0 with 1 being perfect, so we are looking for >0.8 from our methods. We will also use the recall score of our ML methods to determine how well they correctly identify a class’s difficulty. Finally, even though the accuracy score usually does not tell the full story, we will use it as well to tell how often our classifiers fail to correctly identify. 
-
- 
-
-Word Count (not including anything this line and below): 589 
-
- 
-
-Citations 
-
-https://www.aasa.org/resources/resource/small-classes-big-possibilities 
-
-[1] “Small classes, big possibilities,” Default, https://www.aasa.org/resources/resource/small-classes-big-possibilities [accessed Oct. 4, 2024]. 
-
- 
-
-https://lite.gatech.edu/lite_script/dashboards/grade_distribution.html 
-
-[2] Grade distribution, https://lite.gatech.edu/lite_script/dashboards/grade_distribution.html [accessed Oct. 4, 2024]. 
-
- 
-
-https://www.ratemyprofessors.com/ 
-
-[3] “Find and rate your professor or school,” Rate My Professors, https://www.ratemyprofessors.com/ [accessed Oct. 4, 2024]. 
-
- 
-Gantt Chart:
-https://gtvault.sharepoint.com/:x:/s/CS4641ProjectGroup120/EZY21_YXBgZOlRWj8EyASzAB2wrWbY-PQEUM1Bkezptn8Q?e=pntQ71
+# Contributions Section
+st.header("Contributions")
+st.write("""
+- **John Andrade**: Introduction, problem definition, citations, Gantt chart
+- **Juan Macias-Romero**: GitHub repository, Methods, Streamlit
+- **Mattias Anderson**: Proposal review, Video
+- **Alexandre Abchee**: Methods, Data Acquisition
+- **Hayk Arsenyan**: Results/Discussion, Methods
+""")
 
 
-Contributions: 
 
-John Andrade 
+X_train, y_train = utils.preprocess_data('data/Grade_Distribution_Data.xlsx')
+Xv, Xv_scaled, labels = utils.two_d_Kmeans(X_train, y_train)
+u_labels = np.unique(labels)
 
-Introduction, problem definition, citations, Gantt chart 
+# Visualization
+Xv['Cluster'] = labels
+Xv_scaled['Cluster'] = labels
 
-Juan Macias-Romero 
+# plt.title('Raw data')
+# plt.scatter(Xv['AverageGrade'], 
+#             Xv['Number'],
+#             alpha=0.5,
+#             s=20,
+#             rasterized=True)
+# plt.legend()
+# plt.show()
 
-GitHub repository, Methods, Streamlit 
+# # Plot the data with clusters in the original scale
+# plt.title('Scaled data')
+# for cluster in Xv_scaled['Cluster'].unique():
+#     cluster_data = Xv_scaled[Xv_scaled['Cluster'] == cluster]
+#     plt.scatter(cluster_data['AverageGrade'], cluster_data['Number'], label=f'Cluster {cluster}')  
+# plt.legend()
+# plt.show()
 
-Mattias Anderson 
+# # Plot the data with clusters in the original scale
+# plt.title('Original data')
+# for cluster in Xv['Cluster'].unique():
+#     cluster_data = Xv[Xv['Cluster'] == cluster]
+#     plt.scatter(cluster_data['AverageGrade'], 
+#                cluster_data['Number'],
+#                label=f'Cluster {cluster}',
+#                alpha=0.5,
+#                s=20,
+#                rasterized=True)
+# plt.legend()
+# plt.show()
 
-Proposal review, Video 
 
-Alexandre Abchee 
+# Raw data plot
+st.title('Raw data')
+scatter_data = pd.DataFrame({
+    'AverageGrade': Xv['AverageGrade'],
+    'Number': Xv['Number']
+})
+st.scatter_chart(
+    data=scatter_data,
+    x='AverageGrade',
+    y='Number'
+)
 
-Methods, Data Acquisition  
+# Scaled data plot with clusters
+st.title('Scaled data')
+st.scatter_chart(
+    data=Xv_scaled,
+    x='AverageGrade',
+    y='Number',
+    color='Cluster'
+)
 
-Hayk Arsenyan 
-
-Results/Discussion, Methods 
-
- """
+# Original data plot with clusters
+st.title('Original data')
+st.scatter_chart(
+    data=Xv,
+    x='AverageGrade',
+    y='Number',
+    color='Cluster'
 )
