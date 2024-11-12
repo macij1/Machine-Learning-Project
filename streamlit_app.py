@@ -1,10 +1,9 @@
 import streamlit as st
 # import src.ml_120 as ml
-import matplotlib.pyplot as plt
-import numpy as np
-import pandas as pd
+# import matplotlib.pyplot as plt
+# import numpy as np
+# import pandas as pd
 
-import streamlit as st
 from PIL import Image
 
 # Load the image
