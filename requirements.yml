@@ -1,0 +1,11 @@
+name: project_env
+channels:
+    - defaults
+dependencies:
+    - python=3.11
+    - streamlit
+    - matplotlib
+    - numpy
+    - pandas
+    - scikit-learn
+    - openpyxl
