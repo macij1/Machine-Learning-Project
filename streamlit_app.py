@@ -1,10 +1,14 @@
 import streamlit as st
-import src.ml_120 as ml
+# import src.ml_120 as ml
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
 import streamlit as st
+from PIL import Image
+
+# Load the image
+image = Image.open("src/image.png")
 
 # Title of the app
 st.title("Group 120: Machine Project Overview")
@@ -88,136 +92,139 @@ st.header("Gantt Chart")
 st.write("You can view our Gantt chart [here](https://gtvault.sharepoint.com/:x:/s/CS4641ProjectGroup120/EZY21_YXBgZOlRWj8EyASzAB2wrWbY-PQEUM1Bkezptn8Q?e=pntQ71).")
 
 
+# IMAGE
+
+# X_train, y_train= ml.preprocess_data('data/Grade_Distribution_Data.xlsx')
+# X, Xv_scaled, labels, fm_score, silhouette  = ml.Kmeans(X_train, y_train)
+# u_labels = np.unique(labels)
+
+# Display the image
+st.image(image, caption="Problems with link", use_column_width=True)
+
+# # Visualization
+# X['Cluster'] = labels
+# Xv_scaled['Cluster'] = labels
+
+# # plt.title('Raw data')
+# # plt.scatter(Xv['AverageGrade'], 
+# #             Xv['Number'],
+# #             alpha=0.5,
+# #             s=20,
+# #             rasterized=True)
+# # plt.legend()
+# # plt.show()
+
+# # # Plot the data with clusters in the original scale
+# # plt.title('Scaled data')
+# # for cluster in Xv_scaled['Cluster'].unique():
+# #     cluster_data = Xv_scaled[Xv_scaled['Cluster'] == cluster]
+# #     plt.scatter(cluster_data['AverageGrade'], cluster_data['Number'], label=f'Cluster {cluster}')  
+# # plt.legend()
+# # plt.show()
+
+# # # Plot the data with clusters in the original scale
+# # plt.title('Original data')
+# # for cluster in Xv['Cluster'].unique():
+# #     cluster_data = Xv[Xv['Cluster'] == cluster]
+# #     plt.scatter(cluster_data['AverageGrade'], 
+# #                cluster_data['Number'],
+# #                label=f'Cluster {cluster}',
+# #                alpha=0.5,
+# #                s=20,
+# #                rasterized=True)
+# # plt.legend()
+# # plt.show()
 
 
-X_train, y_train= ml.preprocess_data('data/Grade_Distribution_Data.xlsx')
-X, Xv_scaled, labels, fm_score, silhouette  = ml.Kmeans(X_train, y_train)
-u_labels = np.unique(labels)
+# # Raw data plot
+# st.title('Raw data')
+# scatter_data = pd.DataFrame({
+#     'Course Number': X['Number'],
+#     'True label': y_train
+# })
+# st.scatter_chart(
+#     data=scatter_data,
+#     x='Course Number',
+#     y='True label'
+# )
 
-# Visualization
-X['Cluster'] = labels
-Xv_scaled['Cluster'] = labels
+# # Scaled data plot with clusters
+# st.title('Scaled data')
+# st.scatter_chart(
+#     data=Xv_scaled,
+#     x='AverageGrade',
+#     y='Number',
+#     color='Cluster'
+# )
 
-# plt.title('Raw data')
-# plt.scatter(Xv['AverageGrade'], 
-#             Xv['Number'],
-#             alpha=0.5,
-#             s=20,
-#             rasterized=True)
-# plt.legend()
-# plt.show()
+# # Scaled data plot with clusters
+# st.title('Original data')
+# st.scatter_chart(
+#     data=X,
+#     x='AverageGrade',
+#     y='Number',
+#     color='Cluster'
+# )
 
-# # Plot the data with clusters in the original scale
-# plt.title('Scaled data')
-# for cluster in Xv_scaled['Cluster'].unique():
-#     cluster_data = Xv_scaled[Xv_scaled['Cluster'] == cluster]
-#     plt.scatter(cluster_data['AverageGrade'], cluster_data['Number'], label=f'Cluster {cluster}')  
-# plt.legend()
-# plt.show()
+# # Original data plot with clusters: Course Number
+# st.title('Course Number')
+# scatter_data = pd.DataFrame({
+#     'Course Number': X['Number'],
+#     'True label': y_train,
+#     'Cluster': X['Cluster']
+# })
+# st.scatter_chart(
+#     data=scatter_data,
+#     x='Course Number',
+#     y='True label',
+#     color='Cluster'
+# )
 
-# # Plot the data with clusters in the original scale
-# plt.title('Original data')
-# for cluster in Xv['Cluster'].unique():
-#     cluster_data = Xv[Xv['Cluster'] == cluster]
-#     plt.scatter(cluster_data['AverageGrade'], 
-#                cluster_data['Number'],
-#                label=f'Cluster {cluster}',
-#                alpha=0.5,
-#                s=20,
-#                rasterized=True)
-# plt.legend()
-# plt.show()
+# # Original data plot with clusters: Average_Grade
+# st.title('Average Grade')
+# scatter_data = pd.DataFrame({
+#     'Average_Grade': X['AverageGrade'],
+#     'True label': y_train,
+#     'Cluster': X['Cluster']
+# })
+# st.scatter_chart(
+#     data=scatter_data,
+#     x='Average_Grade',
+#     y='True label',
+#     color='Cluster'
+# )
 
+# # Original data plot with clusters: Average_Grade
+# st.title('Instructor')
+# scatter_data = pd.DataFrame({
+#     'Instructor': X['Instructor_bin'],
+#     'True label': y_train,
+#     'Cluster': X['Cluster']
+# })
+# st.scatter_chart(
+#     data=scatter_data,
+#     x='Instructor',
+#     y='True label',
+#     color='Cluster'
+# )
 
-# Raw data plot
-st.title('Raw data')
-scatter_data = pd.DataFrame({
-    'Course Number': X['Number'],
-    'True label': y_train
-})
-st.scatter_chart(
-    data=scatter_data,
-    x='Course Number',
-    y='True label'
-)
+# # Original data plot with clusters: Subject
+# st.title('Subject')
+# scatter_data = pd.DataFrame({
+#     'Subject': X['Subject'],
+#     'True label': y_train,
+#     'Cluster': X['Cluster']
+# })
+# st.scatter_chart(
+#     data=scatter_data,
+#     x='Subject',
+#     y='True label',
+#     color='Cluster'
+# )
 
-# Scaled data plot with clusters
-st.title('Scaled data')
-st.scatter_chart(
-    data=Xv_scaled,
-    x='AverageGrade',
-    y='Number',
-    color='Cluster'
-)
-
-# Scaled data plot with clusters
-st.title('Original data')
-st.scatter_chart(
-    data=X,
-    x='AverageGrade',
-    y='Number',
-    color='Cluster'
-)
-
-# Original data plot with clusters: Course Number
-st.title('Course Number')
-scatter_data = pd.DataFrame({
-    'Course Number': X['Number'],
-    'True label': y_train,
-    'Cluster': X['Cluster']
-})
-st.scatter_chart(
-    data=scatter_data,
-    x='Course Number',
-    y='True label',
-    color='Cluster'
-)
-
-# Original data plot with clusters: Average_Grade
-st.title('Average Grade')
-scatter_data = pd.DataFrame({
-    'Average_Grade': X['AverageGrade'],
-    'True label': y_train,
-    'Cluster': X['Cluster']
-})
-st.scatter_chart(
-    data=scatter_data,
-    x='Average_Grade',
-    y='True label',
-    color='Cluster'
-)
-
-# Original data plot with clusters: Average_Grade
-st.title('Instructor')
-scatter_data = pd.DataFrame({
-    'Instructor': X['Instructor_bin'],
-    'True label': y_train,
-    'Cluster': X['Cluster']
-})
-st.scatter_chart(
-    data=scatter_data,
-    x='Instructor',
-    y='True label',
-    color='Cluster'
-)
-
-# Original data plot with clusters: Subject
-st.title('Subject')
-scatter_data = pd.DataFrame({
-    'Subject': X['Subject'],
-    'True label': y_train,
-    'Cluster': X['Cluster']
-})
-st.scatter_chart(
-    data=scatter_data,
-    x='Subject',
-    y='True label',
-    color='Cluster'
-)
-
-st.header("Clustering Evaluation Metrics")
-st.write(f"**Fowlkes-Mallows score:** {fm_score}")
-st.write(f"**Silhouette score:** {silhouette}")
-st.write(f"*Please read our report for more information*")
+# st.header("Clustering Evaluation Metrics")
+# st.write(f"**Fowlkes-Mallows score:** {fm_score}")
+# st.write(f"**Silhouette score:** {silhouette}")
+# st.write(f"*Please read our report for more information*")
 
 
