@@ -36,22 +36,6 @@ def binary_encode_column(df, column_name):
 
     return binary_mapping
 
-def create_difficulty(averageGrade, SD):
-  difficulty = 0
-  if averageGrade > 0 and averageGrade < 2:
-    difficulty += 4
-  elif averageGrade > 2 and averageGrade < 2.7:
-    difficulty += 3
-  elif averageGrade > 2.7 and averageGrade < 3.3:
-    difficulty += 2
-  elif averageGrade > 3.3 and averageGrade < 3.7:
-    difficulty += 1
-  if SD > 0.5:
-    difficulty += 1
-  if difficulty > 4:
-    difficulty = 4
-  return difficulty
-
 def preprocess_data(filename = 'Grade_Distribution_Data.xlsx'):
     # Get data and show that it has done so, Note you will have to upload the data if opened on google Colab, file in teams chat
     data = pd.read_excel(filename, sheet_name='AY2023 AY2024 Grade Distro')
@@ -61,47 +45,46 @@ def preprocess_data(filename = 'Grade_Distribution_Data.xlsx'):
     # There is a lot more that can be done with pandas for manipulating our data, this is just a start
     train_data = data.copy(deep="True")
     np.random.seed(100)
-
-    train_data.drop(columns=['A', 'B', 'C', 'D', 'F', 'W', 'Trm Code'], inplace=True)
+    train_data.drop(columns=['A', 'B', 'C', 'D', 'F', 'W', 'Section', 'Trm Code'], inplace=True)
     train_data.rename(columns={'Academic Year': 'AcademicYear', 'Course Subject and Number': 'CourseSubjectandNumber', 'Average Grade': 'AverageGrade', 'Primary Instructor Name': 'PrimaryInstructorName'}, inplace=True)
     train_data = train_data[train_data.AcademicYear != "2022-23"]
+    train_data = train_data[train_data.AverageGrade != 4]
     train_data = train_data[train_data.AverageGrade != 'Total']
     train_data.drop(columns=['AcademicYear'], inplace=True)
+    #train_data = train_data[train_data['CourseSubjectandNumber'].str.contains("CS")] <-- we have no CS classes lol
     train_data.dropna(inplace=True)
-
-    #remove any labs, recitations, etc
-    train_data = train_data[~train_data['Section'].str.contains(r'[0-9]', regex=True, na=False)]
-    train_data.drop(columns=['Section'], inplace=True)
-
-    #Begin converting all strings into ints, this require a lot of encoding and will be difficult for instructors
-    train_data[['Subject', 'Number']] = train_data['CourseSubjectandNumber'].str.split(' ', n=1, expand=True)
-    train_data['Number'] = train_data['Number'].astype(int)
+    
+    # Begin converting all strings into ints, this require a lot of encoding and will be difficult for instructors
+    # Split into Subject and Number more clearly
+    split_data = train_data['CourseSubjectandNumber'].str.split(' ', n=1, expand=True)
+    train_data['Subject'] = split_data[0]
+    train_data['Number'] = split_data[1].astype(int)
     train_data.drop(columns=['CourseSubjectandNumber'], inplace=True)
     train_data.rename(columns={'PrimaryInstructorName': 'Instructor'}, inplace=True)
     #print(train_data.columns)
-
+    
     columns_map = {'Subject': {'AE': 0, 'ARCH': 1, 'ECE': 2, 'ME': 3, 'NRE': 4, 'AE': 5, 'MP': 6}}
     train_data.replace(columns_map, inplace=True)
-
-    #Apply difficulty to each column
+    
+    # Temporary insert of answers for now, plus randomizer, should do this manually or something later, 0 = easy, 1 = hard
     train_data.insert(len(train_data.columns), "Difficulty", 0)
-    train_data['Difficulty'] = train_data.apply(lambda row: create_difficulty(row['AverageGrade'], row['Standard Deviation']),axis=1)
-
+    change = train_data.sample(int(0.2*len(train_data))).index
+    train_data.loc[change,'Difficulty'] = 1
+    
     # TODO: Recover name with the mapping
     instructor_encode_map = binary_encode_column(train_data, 'Instructor')
     train_data.drop(columns=['Instructor'], inplace=True)
-
-
-    #Easy way to split into train and test, only train is used right now
+    
+    # Easy way to split into train and test, only train is used right now
     train, test = np.split(train_data.sample(frac=1), [int(0.8*len(train_data))])
-
+    
     X_train = train.loc[:, train_data.columns != 'Difficulty']
     y_train = train.loc[:, 'Difficulty']
     return X_train, y_train
 
 #KMeans
 def kmeans(X_train, y_train):
-    model = KMeans(n_clusters=5, random_state=0, n_init="auto") #Basic, no parameter tweaking really
+    model = KMeans(n_clusters=2, random_state=0, n_init="auto") #Basic, no parameter tweaking really
     km_model = model.fit(X_train.values) # Need everything to be numbers instead of strings
 
     # confusion matrix
@@ -133,11 +116,6 @@ def Kmeans(X_train, y_train):
 
     model = KMeans(n_clusters=5, random_state=0, n_init="auto") #Basic, no parameter tweaking really
     labels = model.fit_predict(X_train_scaled, y_train) # Need everything to be numbers instead of strings
-    
-    # metrics
-    # KM_y_pred = cross_val_predict(model, X_train_scaled, y_train)
-    fm_score = fowlkes_mallows_score(y_train, model.labels_)
-    silhouette = silhouette_score(X_train, model.labels_)
 
-    return X_train, X_train_scaled, labels, fm_score, silhouette
+    return X_train, X_train_scaled, labels
 

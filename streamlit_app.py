@@ -1,5 +1,5 @@
 import streamlit as st
-import ml_120 as utils
+import src.ml_120 as ml
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
@@ -11,59 +11,69 @@ st.title("Group 120: Machine Project Overview")
 
 # Introduction Section
 st.header("Introduction")
-st.write("""
-Many students struggle with determining how hard a class can be due to many varying factors. In our project, we aim to simplify this by looking at grade distributions for classes, professor ratings, and class sizes to determine the difficulty of a class.
-
-Our main dataset is the grade distribution of all Georgia Tech classes [2]. This website can filter by college, course number, professor, and semester, and provides the average GPA of the class during that time. We will also use professor rating websites to see how professor ratings affect GPA [3]. Finally, we will factor in class sizes for determining difficulty [1].
-""")
+st.write(
+    """
+    Determining the difficulty level of a course is often challenging for students, as multiple factors contribute to how demanding a class may be. In this project, we aim to simplify this process by analyzing three primary data points: grade distributions, professor ratings, and class sizes at Georgia Tech. Our objective is to classify classes into difficulty tiers, such as “Easy,” “Medium,” and “Hard,” using machine learning techniques. By making these insights available, we hope to provide students with an accessible resource for better course planning.
+    """
+)
 
 # Problem Definition Section
 st.header("Problem Definition")
-st.write("""
-A common dilemma for college students is determining how difficult a class can be, especially without external resources. This is crucial for Georgia Tech students, as they often care about their grade and the amount of effort required in these classes. We aim to simplify this process with an ML approach, classifying class difficulty into ranges from "easy" to "very hard" using grade distribution, professor rating, and class size as features.
-""")
+st.write(
+    """
+    Our approach addresses a common dilemma for students: assessing the effort required for various courses. Instead of relying solely on subjective online reviews or anecdotal feedback, our model will use actual performance data. This structured classification can serve as an informed guide to help students anticipate course rigor and workload.
+    """
+)
 
-# Methods Section
-st.header("Methods")
+# Data Collection & Preprocessing Section
+st.header("Data Collection & Preprocessing")
+st.write(
+    """
+    Our initial ideas for data were ambitious. We have not been able to get professor ratings from external sources nor class sizes in an efficient way without manually combing through each class and professor for each data point. We still would like to do this but are still figuring out an automatic way to do this. However, we were able to obtain the Georgia Tech grade distribution data from the owners, the Office of Institutional Research & Planning. This data included many features of each class, but we decided to use only average grade, standard deviations of the grades, instructor name, subject, and course number.
 
-# Data Acquisition Subheader
-st.subheader("Data Acquisition")
-st.write("""
-We plan to automate data acquisition, as grade distribution data is not directly downloadable, and professor ratings and class sizes need to be gathered as well. We will consider using web scraping tools like BeautifulSoup in our data pipeline, and if successful, we will apply this to other websites like RateMyProfessor.
-""")
+    Most of our preprocessing included dropping columns and encoding strings into numbers. For dropping columns and rows, we removed any labs and recitations from our data to remove significant outliers as well as any classes missing an average grade as this indicated a 100% withdrawal rate. Our main preprocessing method was data encoding, where we would convert strings into integers. We did this both for subject and for instructor. For our true labels, we decided to initially assign certain classes “very easy”, “easy”, “medium”, “hard”, “very hard” based on our own understanding of the course number and average GPA with a simple algorithm.
+    """
+)
 
-# Preprocessing Subheader
-st.subheader("Preprocessing")
+# Machine Learning Model Section
+st.header("Machine Learning Model")
+st.subheader("K-means actual implementation")
+st.write(
+    """
+    After first preprocessing our data, we then used this preprocessed data as the training data for the K-means clustering, which was our first and currently only implemented model. We selected kmeans because it's a relatively simple and easy to use starter model for our data, and to act as a baseline for later comparisons. We used scikit-learn for the k-means clustering implementation, then used Streamlit for the visualization of the results. We decided to plot the grade distribution data variables such as course number and average grade as the independent variables and the true labels as the dependent variable for better visualized clusters.
+    """
+)
 
-st.write("""
-- **One-Hot Encoding**: We will use Scikit-learn's `OneHotEncoder` to convert categorical data (e.g., professor names, department names, semesters) into binary values.
-- **Standard Scaling**: We will apply Scikit-learn's `StandardScaler` to remove the mean and scale features to unit variance. This is crucial for algorithms sensitive to feature scaling, such as SVM or K-means.
-- **Handling Missing Values**: We will use Scikit-learn's `SimpleImputer` to define strategies for imputing missing values (e.g., replacing them with zero, mean, median, or the most frequent value).
+# Results Section
+st.header("Results")
+st.write(
+    """
+    As seen in the visualization, our original labels do not match the output clusters. One reason for this could be that our K-means algorithm is actually finding a different pattern to determine the difficulty of the class that we aren’t noticing. Another reason is that the variables input into the algorithm are not good indicators of the difficulty of the class. We originally thought the K-means would find a connection between higher course number and a more difficult class, but our implementation actually saw a wide variety of difficulties among the higher courses. This means course number is most likely not a good indicator of the difficulty to input for a K-means implementation. We may also be trying to find correlations between variables from classes that are too dissimilar either in course number or class type. If we chose a dataset too variably different then we would need many more input variables to accurately determine good clustering for difficulty among classes.
 
-We will also explore advanced preprocessing methods like non-linear transformations and normalization.
-""")
+    We also think that our encoding may have some problems as well. We have no semantics, such as encoding harder subjects with higher numbers, within our encoding. This could be acceptable in some ML methods, but K-Means is an unsupervised method that measures difference.
+    """
+)
 
-# Machine Learning Methods Subheader
-st.subheader("Machine Learning Methods")
-st.write("""
-- **Random Forest**: We will use Scikit-learn's `RandomForestClassifier` or `RandomForestRegressor` to predict grade distributions based on features like professor, department, semester, and class size, and to analyze feature importance.
-- **Support Vector Machines (SVM)**: We will use Scikit-learn's `SVC` (Support Vector Classifier) to classify classes into difficulty levels (e.g., “Easy,” “Medium,” “Hard,” “Very Hard”) and compare these classifications with simpler metrics.
-- **K-Means**: We will use Scikit-learn's `KMeans` to explore clustering in our database and identify natural groupings among classes, such as clusters with consistently high or low grade distributions.
-""")
+# Next Steps Section
+st.header("Next Steps")
+st.write(
+    """
+    First, we want to improve our encoding methods to have more semantics, especially for kmeans. To do this, we would want professor ratings to help with our new encoding method to ensure lower rated professors are encoding with higher values. Next, we would want to introduce new preprocessing methods such as PCA to reduce the number of features. Finally, we will implement our other models, such as SVMs and random forests, for our analysis and comparison of the algorithms.
+    """
+)
 
-# Potential Methods for Further Exploration Subheader
-st.subheader("Potential Methods for Further Exploration")
-st.write("""
-- **Principal Component Analysis (PCA)**
-- **Gaussian Mixture Models (GMM)**
-- **Gradient Boosting Machines (GBM)**
-""")
+# Contributions Table
+st.header("Contributions Table")
+st.write(
+    """
+    - **Hayk Arsenyan**: Report Review, Methods Review
+    - **Alexandre Abchee**: Report Writing, Methods Review, Report Review
+    - **John Andrade**: Preprocessing, Methods Review, Data Collection, Report Review
+    - **Mattias Anderson**: Methods Implementation, Preprocessing, Results, Report Review
+    - **Juan Macias-Romero**: Methods Implementation, Streamlit, Data Collection, Report Review
+    """
+)
 
-# Results and Discussion Section
-st.header("Results/Discussion")
-st.write("""
-Since we are primarily doing classification, our main evaluation metric will be the **F1 score**, as it provides a good balance of precision and recall. We are aiming for an F1 score greater than 0.8. We will also use the **recall score** to determine how well our model correctly identifies class difficulty. Finally, although the **accuracy score** doesn't tell the full story, we will include it to measure how often our classifiers fail to correctly identify class difficulty.
-""")
 
 # Citations Section
 st.header("Citations")
@@ -77,24 +87,15 @@ st.write("""
 st.header("Gantt Chart")
 st.write("You can view our Gantt chart [here](https://gtvault.sharepoint.com/:x:/s/CS4641ProjectGroup120/EZY21_YXBgZOlRWj8EyASzAB2wrWbY-PQEUM1Bkezptn8Q?e=pntQ71).")
 
-# Contributions Section
-st.header("Contributions")
-st.write("""
-- **John Andrade**: Introduction, problem definition, citations, Gantt chart
-- **Juan Macias-Romero**: GitHub repository, Methods, Streamlit
-- **Mattias Anderson**: Proposal review, Video
-- **Alexandre Abchee**: Methods, Data Acquisition
-- **Hayk Arsenyan**: Results/Discussion, Methods
-""")
 
 
 
-X_train, y_train = utils.preprocess_data('data/Grade_Distribution_Data.xlsx')
-Xv, Xv_scaled, labels = utils.two_d_Kmeans(X_train, y_train)
+X_train, y_train= ml.preprocess_data('data/Grade_Distribution_Data.xlsx')
+X, Xv_scaled, labels, fm_score, silhouette  = ml.Kmeans(X_train, y_train)
 u_labels = np.unique(labels)
 
 # Visualization
-Xv['Cluster'] = labels
+X['Cluster'] = labels
 Xv_scaled['Cluster'] = labels
 
 # plt.title('Raw data')
@@ -131,13 +132,13 @@ Xv_scaled['Cluster'] = labels
 # Raw data plot
 st.title('Raw data')
 scatter_data = pd.DataFrame({
-    'AverageGrade': Xv['AverageGrade'],
-    'Number': Xv['Number']
+    'Course Number': X['Number'],
+    'True label': y_train
 })
 st.scatter_chart(
     data=scatter_data,
-    x='AverageGrade',
-    y='Number'
+    x='Course Number',
+    y='True label'
 )
 
 # Scaled data plot with clusters
@@ -149,11 +150,74 @@ st.scatter_chart(
     color='Cluster'
 )
 
-# Original data plot with clusters
+# Scaled data plot with clusters
 st.title('Original data')
 st.scatter_chart(
-    data=Xv,
+    data=X,
     x='AverageGrade',
     y='Number',
     color='Cluster'
 )
+
+# Original data plot with clusters: Course Number
+st.title('Course Number')
+scatter_data = pd.DataFrame({
+    'Course Number': X['Number'],
+    'True label': y_train,
+    'Cluster': X['Cluster']
+})
+st.scatter_chart(
+    data=scatter_data,
+    x='Course Number',
+    y='True label',
+    color='Cluster'
+)
+
+# Original data plot with clusters: Average_Grade
+st.title('Average Grade')
+scatter_data = pd.DataFrame({
+    'Average_Grade': X['AverageGrade'],
+    'True label': y_train,
+    'Cluster': X['Cluster']
+})
+st.scatter_chart(
+    data=scatter_data,
+    x='Average_Grade',
+    y='True label',
+    color='Cluster'
+)
+
+# Original data plot with clusters: Average_Grade
+st.title('Instructor')
+scatter_data = pd.DataFrame({
+    'Instructor': X['Instructor_bin'],
+    'True label': y_train,
+    'Cluster': X['Cluster']
+})
+st.scatter_chart(
+    data=scatter_data,
+    x='Instructor',
+    y='True label',
+    color='Cluster'
+)
+
+# Original data plot with clusters: Subject
+st.title('Subject')
+scatter_data = pd.DataFrame({
+    'Subject': X['Subject'],
+    'True label': y_train,
+    'Cluster': X['Cluster']
+})
+st.scatter_chart(
+    data=scatter_data,
+    x='Subject',
+    y='True label',
+    color='Cluster'
+)
+
+st.header("Clustering Evaluation Metrics")
+st.write(f"**Fowlkes-Mallows score:** {fm_score}")
+st.write(f"**Silhouette score:** {silhouette}")
+st.write(f"*Please read our report for more information*")
+
+
