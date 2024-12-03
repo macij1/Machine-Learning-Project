@@ -97,6 +97,14 @@ def preprocess_data(filename = 'Grade_Distribution_Data.xlsx'):
 
     X_train = train.loc[:, train_data.columns != 'Difficulty']
     y_train = train.loc[:, 'Difficulty']
+
+    #Removing binary and converting to ints/floats
+    X_train['Instructor_bin'] = X_train['Instructor_bin'].apply(lambda x: int(x, 2)).astype(float)
+    X_train['Number'] = X_train['Number'].astype(int)
+
+    #Applying normalization
+    X_train = (X_train - X_train.min()) / (X_train.max() - X_train.min())
+    
     return X_train, y_train
 
 #KMeans
