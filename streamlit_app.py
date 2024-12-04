@@ -10,7 +10,7 @@ from PIL import Image
 image = Image.open("src/image.png")
 
 # Title of the app
-st.title("Group 120: Machine Project Overview")
+st.title("Group 120: Machine Project Final Report")
 
 # Introduction Section
 st.header("Introduction")
@@ -32,9 +32,7 @@ st.write(
 st.header("Data Collection & Preprocessing")
 st.write(
     """
-    Our initial ideas for data were ambitious. We have not been able to get professor ratings from external sources nor class sizes in an efficient way without manually combing through each class and professor for each data point. We still would like to do this but are still figuring out an automatic way to do this. However, we were able to obtain the Georgia Tech grade distribution data from the owners, the Office of Institutional Research & Planning. This data included many features of each class, but we decided to use only average grade, standard deviations of the grades, instructor name, subject, and course number.
-
-    Most of our preprocessing included dropping columns and encoding strings into numbers. For dropping columns and rows, we removed any labs and recitations from our data to remove significant outliers as well as any classes missing an average grade as this indicated a 100% withdrawal rate. Our main preprocessing method was data encoding, where we would convert strings into integers. We did this both for subject and for instructor. For our true labels, we decided to initially assign certain classes “very easy”, “easy”, “medium”, “hard”, “very hard” based on our own understanding of the course number and average GPA with a simple algorithm.
+    Our initial data collection efforts were ambitious, but challenges arose. We were unable to obtain professor ratings from external sources or gather class sizes efficiently without manually reviewing each data point. Despite these limitations, we successfully acquired Georgia Tech grade distribution data from the Office of Institutional Research & Planning. This dataset included various class features, but we selected only the average grade, standard deviations of the grades, instructor name, subject, and course number. Our main preprocessing was encoding our strings in integers for machine learning compatibility. However, this initial encoding did not include semantic meaning, such as associating harder subjects with higher numerical values. We also removed labs and recitations to exclude significant outliers and eliminated classes missing an average grade, as this indicated a 100% withdrawal rate. Four our truth values, we manually labeled courses as “very easy,” “easy,” “medium,” “hard,” and “very hard” based on course numbers and average GPA using a simple algorithm. Finally, we decided to try and normalize our data using a simple method, but while this did give slightly better results, we ultimately decided to use scalarization as it gave even better results than normalization for our models. 
     """
 )
 
@@ -43,7 +41,28 @@ st.header("Machine Learning Model")
 st.subheader("K-means actual implementation")
 st.write(
     """
-    After first preprocessing our data, we then used this preprocessed data as the training data for the K-means clustering, which was our first and currently only implemented model. We selected kmeans because it's a relatively simple and easy to use starter model for our data, and to act as a baseline for later comparisons. We used scikit-learn for the k-means clustering implementation, then used Streamlit for the visualization of the results. We decided to plot the grade distribution data variables such as course number and average grade as the independent variables and the true labels as the dependent variable for better visualized clusters.
+    After first preprocessing our data, we then used this preprocessed data as the training data for the K-means clustering, which was our first implemented model. We selected kmeans because it's a relatively simple and easy to use starter model for our data, and to act as a baseline for later comparisons. We used scikit-learn for the k-means clustering implementation, then used Streamlit for the visualization of the results. We decided to plot the grade distribution data variables such as course number and average grade as the independent variables and the true labels as the dependent variable for better visualized clusters.
+    """
+)
+
+st.subheader("Support Vector Machine")
+st.write(
+    """
+    We then moved on to adding super vector machine model to our code. We selected this model due to its ability to easily classify where the data would have a good amount of linear separability, which we believe the data has. This is due to its use of a hyperplane. We also experimented with other types of kernels for the SVM.
+    """
+)
+
+st.subheader("Multilayer Perceptron")
+st.write(
+    """
+    Next, we added an MLP mode mainly because we wanted to see how a neural network would work with our given data, but also because we believed that an MLP specifically would have the best classification for our model due to its ability to capture complex nature. While we believed that the data was mostly linear, we wanted to see if the MLP would have better classification because it saw some connections we, and other models, didn’t see.     
+    """
+)
+
+st.subheader("Random Forest")
+st.write(
+    """
+    Finally, we also implemented random forests as our last model. We chose this model due to its ability to counter overfitting as we feared that our previous models may only be useful for the training data that we gave it. We wanted to ensure that our code could be used outside of the limited data that we gave it.     
     """
 )
 
@@ -72,7 +91,7 @@ st.write(
     - **Hayk Arsenyan**: Report Review, Methods Review
     - **Alexandre Abchee**: Report Writing, Methods Review, Report Review
     - **John Andrade**: Preprocessing, Methods Review, Data Collection, Report Review
-    - **Mattias Anderson**: Methods Implementation, Preprocessing, Results, Report Review
+    - **Mattias Anderson**: Methods Implementation, Preprocessing, Results, Report Review, Video
     - **Juan Macias-Romero**: Methods Implementation, Streamlit, Data Collection, Report Review
     """
 )
