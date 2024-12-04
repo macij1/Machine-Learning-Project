@@ -65,11 +65,40 @@ st.write(
 
 # Results Section
 st.header("Results")
+st.subheader("Overall")
 st.write(
     """
-    As seen in the visualization, our original labels do not match the output clusters. One reason for this could be that our K-means algorithm is actually finding a different pattern to determine the difficulty of the class that we aren’t noticing. Another reason is that the variables input into the algorithm are not good indicators of the difficulty of the class. We originally thought the K-means would find a connection between higher course number and a more difficult class, but our implementation actually saw a wide variety of difficulties among the higher courses. This means course number is most likely not a good indicator of the difficulty to input for a K-means implementation. We may also be trying to find correlations between variables from classes that are too dissimilar either in course number or class type. If we chose a dataset too variably different then we would need many more input variables to accurately determine good clustering for difficulty among classes.
+    All things considered, our models performed well, except for k-means. The classification was usually correct, and our F1 scores were very high for our other models. In the future, our models would work much better, especially K-means, if we were able to obtain more data relevant to the course difficulty that do not have too much correlation to the strongest feature, average GPA, such as course schedules and the ratings of the professor. 
+    """
+)
 
-    We also think that our encoding may have some problems as well. We have no semantics, such as encoding harder subjects with higher numbers, within our encoding. This could be acceptable in some ML methods, but K-Means is an unsupervised method that measures difference.
+st.subheader("K-Means ")
+st.write(
+    """
+    K-means under performance could have been a result of a few issues. The first is that the k-means algorithm might have identified patterns in the data that do not match our assumptions about course difficulty. It also could have been that the input variables may not be reliable indicators of difficulty, as evidenced by the wide variation in difficulty among higher course numbers. These problems could have been reduced by better preprocessing, but due to the performance of other models, we are not sure. In the future, we could run other models to find feature importance and limit the k-means to only those features to have a better chance of good clustering in the results.     
+    """
+)
+
+st.subheader("Suport Vector Machine ")
+st.write(
+    """
+    SVM performed extremely well for our purposes, and this is most likely due to how we created our truth labels. They allowed for very easy linear separations of all the clusters, which is where SVMs excel. We used what we found to be the two most important features to define the hyperplane, which were the average GPA and the course number. Looking at the results, the SVM was able to clearly define clusters and was best defined by the linear kernel. Compared to the other models, the SVM clearly defined groupings when comparing the course number and the average GPA. This makes sense because the course number and average GPA were some of the strongest features, which is necessary for strong SVM results.     
+    """
+)
+
+st.subheader("Multilayer Perceptron ")
+st.write(
+    """
+    The neural net performed well for the limited feature pool given. For our implementation, we fine-tuned our hyperparameters to try to our weighted F1-score and accuracy which was 0.97, which is very good. As seen in the loss plot, the neural network trained off the provided data very well to provide an accurate model using all features we could obtain. Compared to the other models, the multilayer perceptron had a very strong accuracy while being able to use all of the given features.      
+    """
+)
+
+st.subheader("Random Forests ")
+st.write(
+    """
+    As seen in the visualizations, our labels do not fully align with the output cluster. A reason could be that our Random Forest model is identifying different patterns that aren’t related to our assumptions. Another reason is that some variables are not strong indicators is that the course number and instructors were not as influential as we initially thought. 
+
+    We originally thought the model would find a clear connection between higher course numbers and increased difficulty. The implementation revealed a different variety of difficulties among higher numbered classes. This meant the course number was not a good indicator of difficulty. As expected, our most influential feature was the average GPA with the standard deviation of the class grade coming in second. When comparing the random forests results with the other results it is shown that random forests best indicated the strengths of each feature more than the other models.     
     """
 )
 
@@ -77,9 +106,12 @@ st.write(
 st.header("Next Steps")
 st.write(
     """
-    First, we want to improve our encoding methods to have more semantics, especially for kmeans. To do this, we would want professor ratings to help with our new encoding method to ensure lower rated professors are encoding with higher values. Next, we would want to introduce new preprocessing methods such as PCA to reduce the number of features. Finally, we will implement our other models, such as SVMs and random forests, for our analysis and comparison of the algorithms.
+    In the future, we would improve our encoding methods by enhancing encoding semantics to align with expected difficulty measures, such as associating lower professor ratings with higher values. We would also implement additional models to explore and implement other models, such as SVM and Random Forest, to compare their performance against K-Means and determine the best algorithm for classifying course difficulty. We also would like to expand the number of features we could obtain. We would develop methods to automatically gather class size and professor ratings data for richer input features. 
+
+    We would keep our models the same as they worked well for what we wanted from each, except for maybe k-means. However, we would want to tweak parameters of each model a little more, especially for k-means, if we used it again, and random forest.      
     """
 )
+
 
 # Contributions Table
 st.header("Contributions Table")
