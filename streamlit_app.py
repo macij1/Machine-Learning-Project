@@ -6,9 +6,6 @@ import pandas as pd
 
 from PIL import Image
 
-# Load the image
-image = Image.open("src/image.png")
-
 # Title of the app
 st.title("Group 120: Machine Project Overview")
 
@@ -92,8 +89,8 @@ st.write("You can view our Gantt chart [here](https://gtvault.sharepoint.com/:x:
 
 
 # Data Acquisition and preprocessing
-X, Y = ml.preprocess_data('data/Grade_Distribution_Data.xlsx')
-X_train, X_test, Y_train, Y_test = ml.split(X, Y) 
+X, Y, data = ml.preprocess_data('data/Grade_Distribution_Data.xlsx')
+X_train, X_test, Y_train, Y_test = ml.split(data) 
 X_train_scaled = ml.scale(X_train)
 X_test_scaled = ml.scale(X_test)
 X_scaled = ml.scale(X) # without splitting, for KMeans
@@ -111,7 +108,7 @@ X_scaled['Cluster'] = labels
 st.title('Raw data')
 scatter_data = pd.DataFrame({
     'Course Number': X['Number'],
-    'True label': y_train
+    'True label': Y_train
 })
 st.scatter_chart(
     data=scatter_data,
@@ -122,88 +119,75 @@ st.scatter_chart(
 # Scaled data plot with clusters
 st.title('Scaled data')
 st.scatter_chart(
-    data=Xv_scaled,
+    data=X_scaled,
     x='AverageGrade',
     y='Number',
     color='Cluster'
 )
 
-# Scaled data plot with clusters
-st.title('Original data')
-st.scatter_chart(
-    data=X,
-    x='AverageGrade',
-    y='Number',
-    color='Cluster'
-)
+# # Scaled data plot with clusters
+# st.title('Original data')
+# st.scatter_chart(
+#     data=X,
+#     x='AverageGrade',
+#     y='Number',
+#     color='Cluster'
+# )
 
-# Original data plot with clusters: Course Number
-st.title('Course Number')
-scatter_data = pd.DataFrame({
-    'Course Number': X['Number'],
-    'True label': y_train,
-    'Cluster': X['Cluster']
-})
-st.scatter_chart(
-    data=scatter_data,
-    x='Course Number',
-    y='True label',
-    color='Cluster'
-)
+# # Original data plot with clusters: Course Number
+# st.title('Course Number')
+# scatter_data = pd.DataFrame({
+#     'Course Number': X['Number'],
+#     'True label': Y_train,
+#     'Cluster': X['Cluster']
+# })
+# st.scatter_chart(
+#     data=scatter_data,
+#     x='Course Number',
+#     y='True label',
+#     color='Cluster'
+# )
 
-# Original data plot with clusters: Average_Grade
-st.title('Average Grade')
-scatter_data = pd.DataFrame({
-    'Average_Grade': X['AverageGrade'],
-    'True label': y_train,
-    'Cluster': X['Cluster']
-})
-st.scatter_chart(
-    data=scatter_data,
-    x='Average_Grade',
-    y='True label',
-    color='Cluster'
-)
+# # Original data plot with clusters: Average_Grade
+# st.title('Average Grade')
+# scatter_data = pd.DataFrame({
+#     'Average_Grade': X['AverageGrade'],
+#     'True label': Y_train,
+#     'Cluster': X['Cluster']
+# })
+# st.scatter_chart(
+#     data=scatter_data,
+#     x='Average_Grade',
+#     y='True label',
+#     color='Cluster'
+# )
 
-# Original data plot with clusters: Average_Grade
-st.title('Instructor')
-scatter_data = pd.DataFrame({
-    'Instructor': X['Instructor_bin'],
-    'True label': y_train,
-    'Cluster': X['Cluster']
-})
-st.scatter_chart(
-    data=scatter_data,
-    x='Instructor',
-    y='True label',
-    color='Cluster'
-)
+# # Original data plot with clusters: Subject
+# st.title('Subject')
+# scatter_data = pd.DataFrame({
+#     'Subject': X['Subject'],
+#     'True label': Y_train,
+#     'Cluster': X['Cluster']
+# })
+# st.scatter_chart(
+#     data=scatter_data,
+#     x='Subject',
+#     y='True label',
+#     color='Cluster'
+# )
 
-# Original data plot with clusters: Subject
-st.title('Subject')
-scatter_data = pd.DataFrame({
-    'Subject': X['Subject'],
-    'True label': y_train,
-    'Cluster': X['Cluster']
-})
-st.scatter_chart(
-    data=scatter_data,
-    x='Subject',
-    y='True label',
-    color='Cluster'
-)
-
-st.header("Clustering Evaluation Metrics")
+st.write("### Clustering Evaluation Metrics")
 st.write(f"**Fowlkes-Mallows score:** {fm_score}")
 st.write(f"**Silhouette score:** {silhouette}")
-st.write(f"*Please read our report for more information*")
 
 # Random Forest
+st.write("# Random Forest")
+ml.RF(X_train_scaled, X_test_scaled, Y_train, Y_test)
 
 # SVM
-
+ml.SVM(X_train_scaled, X_test_scaled, Y_train, Y_test)
 
 # Neural Network
-
+ml.NN(X_train_scaled, X_test_scaled, Y_train, Y_test)
 
 

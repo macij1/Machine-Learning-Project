@@ -11,7 +11,6 @@ Original file is located at
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-import re
 
 
 import seaborn as sns
@@ -22,7 +21,10 @@ from sklearn.cluster import KMeans
 from sklearn.decomposition import PCA
 from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier
 from sklearn.neural_network import MLPClassifier
-from sklearn import svm, tree, neighbors, neural_network, ensemble, preprocessing
+from sklearn import tree, neighbors, neural_network, ensemble, preprocessing
+import streamlit as st
+from sklearn.svm import SVC
+
 
 
 
@@ -43,8 +45,8 @@ def binary_encode_column(df, column_name):
 
   return binary_mapping
 
-def split(X, Y):
-  train, test = np.split(train_data.sample(frac=1), [int(0.8*len(train_data))])
+def split(data):
+  train, test = np.split(data.sample(frac=1), [int(0.8*len(data))])
   X_train = train.loc[:, train.columns != 'Difficulty']
   Y_train = train.loc[:, 'Difficulty']
   X_test = test.loc[:, test.columns != 'Difficulty']
@@ -54,8 +56,8 @@ def split(X, Y):
 def scale(X):
   scaler = StandardScaler()
   # Apply normalization
-  X = scaler.fit_transform(X)
-  return X
+  X_scaled = scaler.fit_transform(X)
+  return pd.DataFrame(X_scaled, columns=X.columns)
 
 
 
@@ -78,7 +80,7 @@ def create_difficulty(averageGrade, SD):
 def preprocess_data(filename = 'Grade_Distribution_Data.xlsx'):
     #Begin preprocessing here
     #There is a lot more that can be done with pandas for manipulating our data, this is just a start
-
+    data = pd.read_excel('data/Grade_Distribution_Data.xlsx', sheet_name='AY2023 AY2024 Grade Distro')
     train_data = data.copy(deep="True")
 
     np.random.seed(100)
@@ -112,17 +114,14 @@ def preprocess_data(filename = 'Grade_Distribution_Data.xlsx'):
     train_data.drop(columns=['Instructor'], inplace=True)
 
     #Removing binary and converting to ints/floats
-    train_data['Instructor_bin'] = train_data['Instructor_bin'].apply(lambda x: int(x, 2)).astype(float)
-    train_data['Number'] = train_data['Number'].astype(int)
+    # train_data['Instructor_bin'] = train_data['Instructor_bin'].apply(lambda x: int(x, 2)).astype(float)
+    # train_data['Number'] = train_data['Number'].astype(int)
 
-    #Removing binary and converting to ints/floats
-    train_data['Instructor_bin'] = train_data['Instructor_bin'].apply(lambda x: int(x, 2)).astype(float)
-    train_data['Number'] = X['Number'].astype(int)
 
     X = train_data.loc[:, train_data.columns != 'Difficulty']
     Y = train_data.loc[:, 'Difficulty']
 
-    return X, Y
+    return X, Y, train_data
 
 def Kmeans(X_train, y_train):
 
@@ -139,13 +138,74 @@ def Kmeans(X_train, y_train):
     fm_score = fowlkes_mallows_score(y_train, model.labels_)
     silhouette = silhouette_score(X_train, model.labels_)
 
-    return X_train, X_train_scaled, labels, fm_score, silhouette
+    return labels, fm_score, silhouette
 
-def NN(X, Y):
-   pass
+def SVM(X_train, X_test, Y_train, Y_test):
+    # Kernels to test
+    kernels = ['linear', 'rbf', 'poly', 'sigmoid']
 
+    # Prepare data for plotting
+    X_train_plot = X_train[['AverageGrade', 'Number']].values
+    Y_train_plot = Y_train.values
+
+    X_test_plot = X_test[['AverageGrade', 'Number']].values
+    Y_test_plot = Y_test.values
+
+    # Scale the features
+    scaler = StandardScaler()
+    X_train_scaled = scaler.fit_transform(X_train_plot)
+    X_test_scaled = scaler.transform(X_test_plot)
+
+    # Streamlit interface
+    st.title("SVM Kernel Comparison")
+
+    # Iterate over kernels
+    for kernel in kernels:
+        st.subheader(f"{kernel.capitalize()} Kernel")
+        
+        # Train SVM with the current kernel
+        svm = SVC(kernel=kernel, gamma='auto')
+        svm.fit(X_train_scaled, Y_train_plot)
+
+        # Create mesh to plot decision boundary
+        x_min, x_max = X_train_plot[:, 0].min() - 1, X_train_plot[:, 0].max() + 1
+        y_min, y_max = X_train_plot[:, 1].min() - 1, X_train_plot[:, 1].max() + 1
+        xx, yy = np.meshgrid(np.linspace(x_min, x_max, 200),
+                             np.linspace(y_min, y_max, 200))
+
+        # Transform mesh grid points
+        xx_scaled = scaler.transform(np.c_[xx.ravel(), yy.ravel()])
+        Z = svm.predict(xx_scaled)
+        Z = Z.reshape(xx.shape)
+
+        # Create plot
+        fig, ax = plt.subplots(1, 2, figsize=(16, 6))
+
+        # Plot decision boundary for training data
+        ax[0].contourf(xx, yy, Z, alpha=0.4, cmap=plt.cm.RdBu)
+        ax[0].scatter(X_train_plot[:, 0], X_train_plot[:, 1],
+                      c=Y_train_plot, cmap=plt.cm.RdBu, edgecolor='black')
+        ax[0].set_title(f'{kernel.capitalize()} Kernel - Training Data')
+        ax[0].set_xlabel('Average Grade')
+        ax[0].set_ylabel('Number')
+
+        # Plot test data predictions
+        Y_pred = svm.predict(X_test_scaled)
+        ax[1].scatter(X_test_plot[:, 0], X_test_plot[:, 1],
+                      c=Y_pred, cmap=plt.cm.RdBu, edgecolor='black')
+        ax[1].set_title(f'{kernel.capitalize()} Kernel - Test Data Predictions')
+        ax[1].set_xlabel('Average Grade')
+        ax[1].set_ylabel('Number')
+
+        # Display plots in Streamlit
+        st.pyplot(fig)
+
+    st.write("## Classification reports")
+    st.image("results/kernels1.png")
+    st.image("results/kernels2.png")
+
+      
 def RF(X_train, X_test, Y_train, Y_test):
-  
   rf_clf = RandomForestClassifier(
       n_estimators=100,
       max_depth=10,
@@ -156,37 +216,68 @@ def RF(X_train, X_test, Y_train, Y_test):
   rf_clf.fit(X_train, Y_train)
   Y_test_pred = rf_clf.predict(X_test)
 
-  print("Test Classification Report:\n", classification_report(Y_test, Y_test_pred))
-  test_f1 = f1_score(Y_test, Y_test_pred, average='weighted')
-  print(f"Test Weighted F1 Score: {test_f1:.2f}")
+  st.image("results/RF_results.png")
 
   feature_importances = pd.DataFrame({
-      'Feature': X_train.columns,
-      'Importance': rf_clf.feature_importances_
+    'Feature': X_train.columns,
+    'Importance': rf_clf.feature_importances_
   }).sort_values(by='Importance', ascending=False)
-  print("Feature Importances:\n", feature_importances)
 
+
+  # Plot 1: Feature Importance
   plt.figure(figsize=(10, 6))
   sns.barplot(x='Importance', y='Feature', data=feature_importances)
   plt.title('Feature Importance in Random Forest')
-  plt.show()
+  st.pyplot(plt)  # Display the plot in Streamlit
 
-  pca = PCA(n_components=2)
-  pca_features = pca.fit_transform(X_test)
+  # PCA for clustering
+  st.image('results/PCA_RF_clustering.png')
 
-  X_test_clustered = pd.DataFrame(pca_features, columns=['PCA1', 'PCA2'])
-  X_test_clustered['Cluster'] = Y_test_pred
+def NN(X_train, X_test, Y_train, Y_test):
+  # Data (replace X_train, X_test, Y_train, Y_test with your actual data)
+  # For example, assume X_train, X_test, Y_train, Y_test are already loaded as DataFrame and Series.
+  # X_train, X_test, Y_train, Y_test = ...
 
-  plt.figure(figsize=(10, 8))
-  sns.scatterplot(
-      x=X_test_clustered['PCA1'],
-      y=X_test_clustered['PCA2'],
-      hue=X_test_clustered['Cluster'],
-      palette='viridis',
-      s=100
+  # Create and train the Neural Network
+  st.title("Neural Network Classifier")
+
+  nn = MLPClassifier(
+    hidden_layer_sizes=(16, 16),  # Two hidden layers with 16 and 16 neurons
+    activation='relu',  # ReLU activation function
+    solver='adam',      # Adam optimization algorithm
+    max_iter=1000,      # Maximum number of iterations
+    random_state=42     # For reproducibility
   )
-  plt.title('Clustering of Classes Using PCA')
-  plt.xlabel('Principal Component 1')
-  plt.ylabel('Principal Component 2')
-  plt.legend(title='Cluster (Difficulty)', loc='upper right')
-  plt.show()
+
+  with st.spinner("Training the Neural Network..."):
+    nn.fit(X_train, Y_train)
+
+  # Display training data shape
+  st.write("### Scaled Training Data:")
+  st.write(X_train)
+
+  # Predict
+  Y_pred = nn.predict(X_test)
+
+  # Display classification metrics
+  st.write("### Classification Report:")
+  st.image("results/nn.png")
+
+  # Plot and display training loss curve
+  st.write("### Neural Network Training Loss Curve:")
+  fig, ax = plt.subplots()
+  ax.plot(nn.loss_curve_)
+  ax.set_title('Neural Network Training Loss')
+  ax.set_xlabel('Iterations')
+  ax.set_ylabel('Loss')
+  st.pyplot(fig)
+
+  # Feature importance
+  if hasattr(nn, 'coefs_'):
+    st.write("### Feature Importance (absolute mean of first layer weights):")
+    feature_importance = np.abs(nn.coefs_[0]).mean(axis=1)
+    feature_importance_df = pd.DataFrame({
+        "Feature": X_train.columns,
+        "Importance": feature_importance
+    }).sort_values(by="Importance", ascending=False)
+    st.write(feature_importance_df)
