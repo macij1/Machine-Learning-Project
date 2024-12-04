@@ -91,48 +91,20 @@ st.header("Gantt Chart")
 st.write("You can view our Gantt chart [here](https://gtvault.sharepoint.com/:x:/s/CS4641ProjectGroup120/EZY21_YXBgZOlRWj8EyASzAB2wrWbY-PQEUM1Bkezptn8Q?e=pntQ71).")
 
 
-# IMAGE
+# Data Acquisition and preprocessing
+X, Y = ml.preprocess_data('data/Grade_Distribution_Data.xlsx')
+X_train, X_test, Y_train, Y_test = ml.split(X, Y) 
+X_train_scaled = ml.scale(X_train)
+X_test_scaled = ml.scale(X_test)
+X_scaled = ml.scale(X) # without splitting, for KMeans
 
-X_train, y_train= ml.preprocess_data('data/Grade_Distribution_Data.xlsx')
-X, Xv_scaled, labels, fm_score, silhouette  = ml.Kmeans(X_train, y_train)
+# KMeans
+labels, fm_score, silhouette  = ml.Kmeans(X, Y)
 u_labels = np.unique(labels)
-
-# Display the image
-# st.image(image, caption="Problems with link", use_column_width=True)
 
 # Visualization
 X['Cluster'] = labels
-Xv_scaled['Cluster'] = labels
-
-# plt.title('Raw data')
-# plt.scatter(X['AverageGrade'], 
-#             X['Number'],
-#             alpha=0.5,
-#             s=20,
-#             rasterized=True)
-# plt.legend()
-# plt.show()
-
-# # # Plot the data with clusters in the original scale
-# # plt.title('Scaled data')
-# # for cluster in Xv_scaled['Cluster'].unique():
-# #     cluster_data = Xv_scaled[Xv_scaled['Cluster'] == cluster]
-# #     plt.scatter(cluster_data['AverageGrade'], cluster_data['Number'], label=f'Cluster {cluster}')  
-# # plt.legend()
-# # plt.show()
-
-# # # Plot the data with clusters in the original scale
-# # plt.title('Original data')
-# # for cluster in Xv['Cluster'].unique():
-# #     cluster_data = Xv[Xv['Cluster'] == cluster]
-# #     plt.scatter(cluster_data['AverageGrade'], 
-# #                cluster_data['Number'],
-# #                label=f'Cluster {cluster}',
-# #                alpha=0.5,
-# #                s=20,
-# #                rasterized=True)
-# # plt.legend()
-# # plt.show()
+X_scaled['Cluster'] = labels
 
 
 # Raw data plot
@@ -225,5 +197,13 @@ st.header("Clustering Evaluation Metrics")
 st.write(f"**Fowlkes-Mallows score:** {fm_score}")
 st.write(f"**Silhouette score:** {silhouette}")
 st.write(f"*Please read our report for more information*")
+
+# Random Forest
+
+# SVM
+
+
+# Neural Network
+
 
 

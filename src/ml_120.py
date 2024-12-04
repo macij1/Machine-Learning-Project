@@ -7,34 +7,57 @@ Original file is located at
     https://colab.research.google.com/drive/1HvI3kh94zOCuG4mWoSZpgMn-j2YdNNMo
 """
 
+
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
+import re
 
-from sklearn.model_selection import cross_val_score, KFold
-from sklearn import svm, tree, neighbors, neural_network, ensemble, preprocessing
-from sklearn.metrics import confusion_matrix, fowlkes_mallows_score
-from sklearn.metrics import silhouette_score, davies_bouldin_score, calinski_harabasz_score
-from sklearn.metrics import mutual_info_score, adjusted_rand_score
+
+import seaborn as sns
 from sklearn.model_selection import train_test_split, KFold, cross_val_score, cross_val_predict
+from sklearn.preprocessing import StandardScaler
+from sklearn.metrics import f1_score, confusion_matrix, classification_report, silhouette_score, davies_bouldin_score, calinski_harabasz_score, fowlkes_mallows_score, mutual_info_score, adjusted_rand_score
 from sklearn.cluster import KMeans
+from sklearn.decomposition import PCA
+from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier
+from sklearn.neural_network import MLPClassifier
+from sklearn import svm, tree, neighbors, neural_network, ensemble, preprocessing
+
+
 
 # Binary encoding
 def binary_encode_column(df, column_name):
-    # Get unique values in the column and the number of bits required
-    unique_values = df[column_name].unique()
-    num_bits = int(np.ceil(np.log2(len(unique_values))))  # Minimum bits needed
+  # Get unique values in the column and the number of bits required
+  unique_values = df[column_name].unique()
+  num_bits = int(np.ceil(np.log2(len(unique_values))))  # Minimum bits needed
 
-    # Map each unique value to its binary representation
-    binary_mapping = {val: format(i, f'0{num_bits}b') for i, val in enumerate(unique_values)}
+  # Map each unique value to its binary representation
+  binary_mapping = {val: format(i, f'0{num_bits}b') for i, val in enumerate(unique_values)}
 
-    # Apply the mapping to create a new column with binary strings
-    df[f"{column_name}_bin"] = df[column_name].map(binary_mapping)
+  # Apply the mapping to create a new column with binary strings
+  df[f"{column_name}_bin"] = df[column_name].map(binary_mapping)
 
-    # Drop the original column if desired
-    df = df.drop(columns=[column_name])
+  # Drop the original column if desired
+  df = df.drop(columns=[column_name])
 
-    return binary_mapping
+  return binary_mapping
+
+def split(X, Y):
+  train, test = np.split(train_data.sample(frac=1), [int(0.8*len(train_data))])
+  X_train = train.loc[:, train.columns != 'Difficulty']
+  Y_train = train.loc[:, 'Difficulty']
+  X_test = test.loc[:, test.columns != 'Difficulty']
+  Y_test = test.loc[:, 'Difficulty']
+  return X_train, X_test, Y_train, Y_test
+
+def scale(X):
+  scaler = StandardScaler()
+  # Apply normalization
+  X = scaler.fit_transform(X)
+  return X
+
+
 
 def create_difficulty(averageGrade, SD):
   difficulty = 0
@@ -53,13 +76,11 @@ def create_difficulty(averageGrade, SD):
   return difficulty
 
 def preprocess_data(filename = 'Grade_Distribution_Data.xlsx'):
-    # Get data and show that it has done so, Note you will have to upload the data if opened on google Colab, file in teams chat
-    data = pd.read_excel(filename, sheet_name='AY2023 AY2024 Grade Distro')
-    data.head()
-    
-    # Begin preprocessing here
-    # There is a lot more that can be done with pandas for manipulating our data, this is just a start
+    #Begin preprocessing here
+    #There is a lot more that can be done with pandas for manipulating our data, this is just a start
+
     train_data = data.copy(deep="True")
+
     np.random.seed(100)
 
     train_data.drop(columns=['A', 'B', 'C', 'D', 'F', 'W', 'Trm Code'], inplace=True)
@@ -75,7 +96,6 @@ def preprocess_data(filename = 'Grade_Distribution_Data.xlsx'):
 
     #Begin converting all strings into ints, this require a lot of encoding and will be difficult for instructors
     train_data[['Subject', 'Number']] = train_data['CourseSubjectandNumber'].str.split(' ', n=1, expand=True)
-    train_data['Number'] = train_data['Number'].astype(int)
     train_data.drop(columns=['CourseSubjectandNumber'], inplace=True)
     train_data.rename(columns={'PrimaryInstructorName': 'Instructor'}, inplace=True)
     #print(train_data.columns)
@@ -88,49 +108,21 @@ def preprocess_data(filename = 'Grade_Distribution_Data.xlsx'):
     train_data['Difficulty'] = train_data.apply(lambda row: create_difficulty(row['AverageGrade'], row['Standard Deviation']),axis=1)
 
     # TODO: Recover name with the mapping
-    instructor_encode_map = binary_encode_column(train_data, 'Instructor')
+    # instructor_encode_map = binary_encode_column(train_data, 'Instructor')
     train_data.drop(columns=['Instructor'], inplace=True)
 
-
-    #Easy way to split into train and test, only train is used right now
-    train, test = np.split(train_data.sample(frac=1), [int(0.8*len(train_data))])
-
-    X_train = train.loc[:, train_data.columns != 'Difficulty']
-    y_train = train.loc[:, 'Difficulty']
+    #Removing binary and converting to ints/floats
+    train_data['Instructor_bin'] = train_data['Instructor_bin'].apply(lambda x: int(x, 2)).astype(float)
+    train_data['Number'] = train_data['Number'].astype(int)
 
     #Removing binary and converting to ints/floats
-    X_train['Instructor_bin'] = X_train['Instructor_bin'].apply(lambda x: int(x, 2)).astype(float)
-    X_train['Number'] = X_train['Number'].astype(int)
+    train_data['Instructor_bin'] = train_data['Instructor_bin'].apply(lambda x: int(x, 2)).astype(float)
+    train_data['Number'] = X['Number'].astype(int)
 
-    #Applying normalization
-    X_train = (X_train - X_train.min()) / (X_train.max() - X_train.min())
-    
-    return X_train, y_train
+    X = train_data.loc[:, train_data.columns != 'Difficulty']
+    Y = train_data.loc[:, 'Difficulty']
 
-#KMeans
-def kmeans(X_train, y_train):
-    model = KMeans(n_clusters=5, random_state=0, n_init="auto") #Basic, no parameter tweaking really
-    km_model = model.fit(X_train.values) # Need everything to be numbers instead of strings
-
-    # confusion matrix
-    KM_y_pred = cross_val_predict(model, X_train, y_train) #Default parameters once again, perhaps specify number of folds?
-
-    KM_tn, KM_fp, KM_fn, KM_tp = confusion_matrix(y_train, KM_y_pred).ravel()
-    # print("True Negatives", KM_tn)
-    # print("False Positives", KM_fp)
-    # print("False Negatives", KM_fn)
-    # print("True Positives", KM_tp)
-
-    # silhouette = silhouette_score(X_train, km_model.labels_)
-    # db_index = davies_bouldin_score(X_train, km_model.labels_)
-    # ch_index = calinski_harabasz_score(X_train, km_model.labels_)
-    # print(f"Silhouette Score: {silhouette:.2f}")
-    # print(f"Davies-Bouldin Index: {db_index:.2f}")
-    # print(f"Calinski-Harabasz Index: {ch_index:.2f}")
-
-    # fm_score = fowlkes_mallows_score(y_train, km_model.labels_)
-    # print(f"Fowlkes-Mallows Score: {fm_score:.2f}")
-    return KM_y_pred
+    return X, Y
 
 def Kmeans(X_train, y_train):
 
@@ -149,3 +141,52 @@ def Kmeans(X_train, y_train):
 
     return X_train, X_train_scaled, labels, fm_score, silhouette
 
+def NN(X, Y):
+   pass
+
+def RF(X_train, X_test, Y_train, Y_test):
+  
+  rf_clf = RandomForestClassifier(
+      n_estimators=100,
+      max_depth=10,
+      random_state=42,
+      class_weight="balanced"
+  )
+  
+  rf_clf.fit(X_train, Y_train)
+  Y_test_pred = rf_clf.predict(X_test)
+
+  print("Test Classification Report:\n", classification_report(Y_test, Y_test_pred))
+  test_f1 = f1_score(Y_test, Y_test_pred, average='weighted')
+  print(f"Test Weighted F1 Score: {test_f1:.2f}")
+
+  feature_importances = pd.DataFrame({
+      'Feature': X_train.columns,
+      'Importance': rf_clf.feature_importances_
+  }).sort_values(by='Importance', ascending=False)
+  print("Feature Importances:\n", feature_importances)
+
+  plt.figure(figsize=(10, 6))
+  sns.barplot(x='Importance', y='Feature', data=feature_importances)
+  plt.title('Feature Importance in Random Forest')
+  plt.show()
+
+  pca = PCA(n_components=2)
+  pca_features = pca.fit_transform(X_test)
+
+  X_test_clustered = pd.DataFrame(pca_features, columns=['PCA1', 'PCA2'])
+  X_test_clustered['Cluster'] = Y_test_pred
+
+  plt.figure(figsize=(10, 8))
+  sns.scatterplot(
+      x=X_test_clustered['PCA1'],
+      y=X_test_clustered['PCA2'],
+      hue=X_test_clustered['Cluster'],
+      palette='viridis',
+      s=100
+  )
+  plt.title('Clustering of Classes Using PCA')
+  plt.xlabel('Principal Component 1')
+  plt.ylabel('Principal Component 2')
+  plt.legend(title='Cluster (Difficulty)', loc='upper right')
+  plt.show()
