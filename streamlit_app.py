@@ -117,7 +117,7 @@ st.write(
 st.header("Contributions Table")
 st.write(
     """
-    - **Hayk Arsenyan**: Report Review, Methods Review
+    - **Hayk Arsenyan**: Feature Engineering, Data Collection, Methods Review, Report Review
     - **Alexandre Abchee**: Report Writing, Methods Review, Report Review
     - **John Andrade**: Preprocessing, Methods Review, Data Collection, Report Review
     - **Mattias Anderson**: Methods Implementation, Preprocessing, Results, Report Review, Video
